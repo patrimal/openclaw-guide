@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClaw Setup Guide &mdash; Secure Configuration &amp; Use Cases</title>
+  <meta name="description" content="Comprehensive guide for setting up OpenClaw securely and privately, with 20 productivity use cases, risk assessments, and pentester review.">
+  <style>
+    :root {
+      --bg: #fafaf9;
+      --text: #1c1917;
+      --muted: #78716c;
+      --accent: #7c3aed;
+      --accent-light: #ede9fe;
+      --accent-dark: #5b21b6;
+      --border: #e7e5e4;
+      --card-bg: #ffffff;
+      --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --code-bg: #f5f5f4;
+      --code-border: #e7e5e4;
+      --toc-bg: #faf5ff;
+      --toc-border: #ddd6fe;
+      --risk-very-high: #dc2626;
+      --risk-high: #ea580c;
+      --risk-medium: #ca8a04;
+      --risk-low-medium: #65a30d;
+      --risk-low: #16a34a;
+      --table-header-bg: #f5f3ff;
+      --table-stripe: #fafaf9;
+      --header-gradient: linear-gradient(135deg, #4c1d95 0%, #7c3aed 50%, #a78bfa 100%);
+      --header-text: #ffffff;
+      --blockquote-bg: #fef3c7;
+      --blockquote-border: #f59e0b;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0c0a09;
+        --text: #fafaf9;
+        --muted: #a8a29e;
+        --accent: #a78bfa;
+        --accent-light: #1e1338;
+        --accent-dark: #c4b5fd;
+        --border: #292524;
+        --card-bg: #1c1917;
+        --card-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+        --code-bg: #1c1917;
+        --code-border: #292524;
+        --toc-bg: #1a0f2e;
+        --toc-border: #4c1d95;
+        --table-header-bg: #1a0f2e;
+        --table-stripe: #1c1917;
+        --header-gradient: linear-gradient(135deg, #1a0533 0%, #4c1d95 50%, #6d28d9 100%);
+        --header-text: #e2e8f0;
+        --blockquote-bg: #292524;
+        --blockquote-border: #d97706;
+      }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 1rem 4rem;
+    }
+
+    /* Header */
+    header {
+      background: var(--header-gradient);
+      color: var(--header-text);
+      padding: 2.5rem 1.5rem 2rem;
+      margin: 0 -1rem 2rem;
+      border-radius: 0 0 12px 12px;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.3rem;
+    }
+    header .subtitle {
+      font-size: 0.95rem;
+      opacity: 0.85;
+      line-height: 1.5;
+    }
+    header .meta-line {
+      font-size: 0.8rem;
+      opacity: 0.6;
+      margin-top: 1rem;
+    }
+
+    /* Table of Contents */
+    .toc {
+      background: var(--toc-bg);
+      border: 1px solid var(--toc-border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .toc h2 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+    .toc ol {
+      list-style: none;
+      counter-reset: toc-counter;
+    }
+    .toc > ol > li {
+      counter-increment: toc-counter;
+      margin-bottom: 0.15rem;
+    }
+    .toc > ol > li > a::before {
+      content: counter(toc-counter) ". ";
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .toc a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: block;
+      padding: 0.2rem 0;
+      border-radius: 4px;
+      transition: color 0.15s;
+    }
+    .toc a:hover {
+      color: var(--accent);
+    }
+    .toc .toc-sub {
+      list-style: none;
+      padding-left: 1.25rem;
+    }
+    .toc .toc-sub a {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .toc .toc-sub a:hover {
+      color: var(--accent);
+    }
+
+    /* Section headings */
+    .part-heading {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--accent);
+      color: var(--accent);
+    }
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 1.75rem 0 0.5rem;
+      color: var(--text);
+    }
+    h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin: 1.25rem 0 0.4rem;
+      color: var(--text);
+    }
+
+    /* Paragraphs & lists */
+    p { margin-bottom: 0.75rem; }
+    ul, ol { margin: 0.5rem 0 1rem 1.5rem; }
+    li { margin-bottom: 0.3rem; }
+    li ul, li ol { margin: 0.2rem 0 0.2rem 1.25rem; }
+
+    /* Links */
+    a { color: var(--accent); }
+    a:hover { text-decoration: underline; }
+
+    /* Code */
+    code {
+      font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, monospace;
+      font-size: 0.82em;
+      background: var(--code-bg);
+      border: 1px solid var(--code-border);
+      border-radius: 4px;
+      padding: 0.15em 0.35em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--code-border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      line-height: 1.5;
+    }
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.8rem;
+    }
+
+    /* Cards for use cases */
+    .use-case {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.25rem 1rem;
+      margin: 1rem 0;
+      box-shadow: var(--card-shadow);
+    }
+    .use-case h4 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .use-case h4 .uc-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .use-case .uc-meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.6rem;
+      font-size: 0.8rem;
+    }
+    .use-case .uc-meta span {
+      padding: 0.15rem 0.5rem;
+      border-radius: 99px;
+      font-weight: 600;
+    }
+    .time-saved {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    /* Risk badges */
+    .risk-very-high { background: #fef2f2; color: var(--risk-very-high); }
+    .risk-high { background: #fff7ed; color: var(--risk-high); }
+    .risk-medium { background: #fefce8; color: var(--risk-medium); }
+    .risk-low-medium { background: #f7fee7; color: var(--risk-low-medium); }
+    .risk-low { background: #f0fdf4; color: var(--risk-low); }
+    @media (prefers-color-scheme: dark) {
+      .risk-very-high { background: #450a0a; }
+      .risk-high { background: #431407; }
+      .risk-medium { background: #422006; }
+      .risk-low-medium { background: #1a2e05; }
+      .risk-low { background: #052e16; }
+    }
+
+    .use-case .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin: 0.6rem 0 0.2rem;
+    }
+    .use-case ul {
+      margin: 0.2rem 0 0.5rem 1.25rem;
+      font-size: 0.9rem;
+    }
+    .use-case p {
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 1rem 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    th {
+      background: var(--table-header-bg);
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      font-weight: 700;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:nth-child(even) td {
+      background: var(--table-stripe);
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      background: var(--blockquote-bg);
+      border-left: 3px solid var(--blockquote-border);
+      padding: 0.75rem 1rem;
+      margin: 0.75rem 0 1rem;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      font-size: 0.9rem;
+    }
+
+    /* Callout boxes */
+    .callout {
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    .callout-warning {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      color: #92400e;
+    }
+    .callout-danger {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+    .callout-info {
+      background: var(--accent-light);
+      border: 1px solid var(--toc-border);
+      color: var(--accent-dark);
+    }
+    @media (prefers-color-scheme: dark) {
+      .callout-warning { background: #422006; border-color: #78350f; color: #fde68a; }
+      .callout-danger { background: #450a0a; border-color: #7f1d1d; color: #fecaca; }
+      .callout-info { background: var(--accent-light); border-color: var(--toc-border); color: var(--accent-dark); }
+    }
+    .callout strong {
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    /* Numbered checklist */
+    .checklist {
+      list-style: none;
+      counter-reset: check-counter;
+      margin-left: 0;
+    }
+    .checklist li {
+      counter-increment: check-counter;
+      padding-left: 2rem;
+      position: relative;
+      margin-bottom: 0.5rem;
+    }
+    .checklist li::before {
+      content: counter(check-counter);
+      position: absolute;
+      left: 0;
+      top: 0.1em;
+      width: 1.4rem;
+      height: 1.4rem;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Back to top */
+    .back-top {
+      display: inline-block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-decoration: none;
+      margin-top: 0.5rem;
+    }
+    .back-top:hover { color: var(--accent); }
+
+    /* Footer */
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+    footer a { color: var(--muted); }
+
+    /* Sources list */
+    .sources {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .sources a { color: var(--muted); }
+    .sources li { margin-bottom: 0.2rem; }
+
+    /* Scroll margin for anchor targets */
+    [id] { scroll-margin-top: 1rem; }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      header { padding: 2rem 1.25rem 1.5rem; }
+      header h1 { font-size: 1.5rem; }
+      .part-heading { font-size: 1.2rem; }
+      .use-case { padding: 1rem; }
+      table { font-size: 0.78rem; }
+      th, td { padding: 0.4rem 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>OpenClaw Setup Guide</h1>
+  <div class="subtitle">Secure configuration, 20 productivity use cases with risk assessments, pentester review, and Claude Code comparison.</div>
+  <div class="meta-line">March 2026 &middot; Based on OpenClaw v2026.3.12+</div>
+</header>
+
+<div class="toc" id="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li><a href="#part-1">Secure &amp; Private Setup Guide</a>
+      <ul class="toc-sub">
+        <li><a href="#s1-1">Architecture</a></li>
+        <li><a href="#s1-2">Hardware &amp; Environment</a></li>
+        <li><a href="#s1-3">Installation</a></li>
+        <li><a href="#s1-4">Network Security</a></li>
+        <li><a href="#s1-5">Authentication &amp; Credentials</a></li>
+        <li><a href="#s1-6">Skill &amp; Supply Chain Security</a></li>
+        <li><a href="#s1-7">API Key Management</a></li>
+        <li><a href="#s1-8">Ongoing Maintenance</a></li>
+      </ul>
+    </li>
+    <li><a href="#part-2">Top 20 Use Cases with Risk Assessments</a></li>
+    <li><a href="#part-3">Risk Summary Matrix</a></li>
+    <li><a href="#part-4">Universal Security Principles</a></li>
+    <li><a href="#part-5">Verification Checklist</a></li>
+    <li><a href="#part-6">Pentester / Whitehat Review</a>
+      <ul class="toc-sub">
+        <li><a href="#s6-risk">Upgraded Risk Assessments</a></li>
+        <li><a href="#s6-vectors">Critical Attack Vectors</a></li>
+        <li><a href="#s6-docker">Docker Hardening</a></li>
+        <li><a href="#s6-ir">Incident Response Plan</a></li>
+        <li><a href="#s6-ratings">Mitigation Ratings</a></li>
+        <li><a href="#s6-scale">Real-World Scale</a></li>
+      </ul>
+    </li>
+    <li><a href="#part-7">OpenClaw vs Claude Code</a></li>
+    <li><a href="#part-8">Steinberger&rsquo;s Perspective</a></li>
+  </ol>
+</div>
+
+<!-- CONTEXT -->
+<div class="callout callout-info">
+  <strong>About this guide</strong>
+  OpenClaw is the fastest-growing open-source project on GitHub (247k+ stars in ~60 days), but its power comes with significant security implications. This guide covers secure setup, the top 20 productivity use cases with detailed risk assessments, and a pentester review of the recommendations.
+</div>
+
+<!-- ===== PART 1 ===== -->
+<h2 class="part-heading" id="part-1">Part 1: Secure &amp; Private Setup Guide</h2>
+
+<h3 id="s1-1">1.1 Understanding the Architecture</h3>
+<p>OpenClaw is a long-running Node.js service that connects LLMs (Claude, GPT, DeepSeek, local models) to your local machine and messaging apps (Signal, Telegram, Discord, WhatsApp). Key architectural facts:</p>
+<ul>
+  <li><strong>Local-first but NOT local-processing</strong>: The core app runs on your hardware, but prompts still travel over the public internet to LLM API endpoints</li>
+  <li><strong>Gateway model</strong>: OpenClaw&rsquo;s Gateway listens on port 18789 via WebSocket &mdash; this is the primary attack surface</li>
+  <li><strong>Skills system</strong>: Functionality comes from skill directories containing SKILL.md files &mdash; these are a supply chain risk vector</li>
+  <li><strong>Persistent memory</strong>: Stores context across sessions in SOUL.md and MEMORY.md files</li>
+</ul>
+
+<h3 id="s1-2">1.2 Hardware &amp; Environment Setup</h3>
+
+<h4>Option A: Dedicated Cloud VPS (Recommended)</h4>
+<ul>
+  <li>Use a dedicated VPS (e.g., DigitalOcean, Hetzner, Contabo &mdash; 2vCPU, 8GB RAM, ~$5&ndash;10/month)</li>
+  <li>This isolates OpenClaw from your personal devices entirely</li>
+  <li>Run inside Docker for additional containment</li>
+</ul>
+
+<h4>Option B: Local Machine (Convenient but higher risk)</h4>
+<ul>
+  <li>Use a dedicated VM or container &mdash; never run directly on your main OS</li>
+  <li>Microsoft explicitly recommends: &ldquo;not appropriate to run on a standard personal or enterprise workstation&rdquo;</li>
+</ul>
+
+<h4>Option C: Dedicated Physical Device</h4>
+<ul>
+  <li>Repurpose an old laptop or use a Raspberry Pi 5 (8GB)</li>
+  <li>Air-gap from sensitive networks</li>
+</ul>
+
+<h3 id="s1-3">1.3 Installation Steps</h3>
+
+<ol class="checklist">
+  <li><strong>Create a dedicated non-root user</strong>:
+    <pre><code>sudo adduser openclaw --disabled-password
+sudo su - openclaw</code></pre>
+  </li>
+  <li><strong>Install via official script</strong> (always verify the script first):
+    <pre><code># Download and review before piping to shell
+curl -fsSL https://get.openclaw.ai -o install.sh
+less install.sh  # REVIEW IT
+bash install.sh</code></pre>
+  </li>
+  <li><strong>Run the onboarding wizard</strong> &mdash; it generates a gateway token by default</li>
+  <li><strong>Immediately run security audit</strong>:
+    <pre><code>openclaw security audit --fix</code></pre>
+  </li>
+</ol>
+
+<h3 id="s1-4">1.4 Network Security Hardening</h3>
+
+<ol>
+  <li><strong>Never expose the Gateway to the public internet directly</strong>
+    <ul>
+      <li>Bind to loopback only: <code>OPENCLAW_GATEWAY_HOST=127.0.0.1</code></li>
+      <li>For remote access, use SSH tunnel or Tailscale:
+        <pre><code>ssh -L 18789:localhost:18789 user@your-vps</code></pre>
+      </li>
+    </ul>
+  </li>
+  <li><strong>Disable mDNS broadcasting</strong>:
+    <pre><code>export OPENCLAW_DISABLE_BONJOUR=1</code></pre>
+    <p>This prevents leaking filesystem paths and hostname info on your local network.</p>
+  </li>
+  <li><strong>Firewall rules</strong>: Block port 18789 from all external access
+    <pre><code>sudo ufw deny 18789</code></pre>
+  </li>
+  <li><strong>Use a reverse proxy with TLS</strong> if you must expose it (Caddy or nginx with Let&rsquo;s Encrypt)</li>
+</ol>
+
+<h3 id="s1-5">1.5 Authentication &amp; Credential Management</h3>
+<ol>
+  <li><strong>Use strong gateway tokens</strong> &mdash; the wizard generates one, but verify it&rsquo;s not weak</li>
+  <li><strong>Scoped API tokens</strong>: For every integration (Gmail, GitHub, etc.), create tokens with minimum required permissions (read-only where possible)</li>
+  <li><strong>Short-lived credentials</strong> over long-lived ones wherever possible</li>
+  <li><strong>Never store secrets in .env files the agent can read</strong> &mdash; use a secrets manager or OS keychain</li>
+  <li><strong>Disable memory storage of secrets</strong>: Ensure SOUL.md/MEMORY.md never contain API keys or passwords</li>
+</ol>
+
+<h3 id="s1-6">1.6 Skill &amp; Supply Chain Security</h3>
+
+<div class="callout callout-danger">
+  <strong>Critical: ~20% of ClawHub skills are malicious</strong>
+  As of Feb 2026, the &ldquo;ClawHavoc&rdquo; campaign identified 824+ malicious skills out of 10,700+ on ClawHub.
+</div>
+
+<ol>
+  <li>Audit every skill before installing: Read the SKILL.md and all associated code manually</li>
+  <li>Only install skills from verified/trusted authors</li>
+  <li>Never install skills that request exec/shell access unless you&rsquo;ve audited them thoroughly</li>
+  <li>Pin skill versions &mdash; don&rsquo;t auto-update</li>
+  <li>Run <code>openclaw security audit</code> after every skill install</li>
+  <li>Consider writing your own skills for sensitive workflows rather than trusting third-party ones</li>
+</ol>
+
+<h3 id="s1-7">1.7 LLM API Key Management</h3>
+<ul>
+  <li>Create a <strong>dedicated API key</strong> for OpenClaw (not your personal/main key)</li>
+  <li>Set <strong>spending limits</strong> on the API key ($20&ndash;50/month to start)</li>
+  <li>Monitor usage dashboards for anomalous spikes (could indicate prompt injection exfiltrating data)</li>
+  <li>Rotate keys monthly</li>
+</ul>
+
+<h3 id="s1-8">1.8 Ongoing Maintenance</h3>
+
+<div class="callout callout-warning">
+  <strong>60+ CVEs and 60+ GHSAs in ~4 months</strong>
+  Including CVE-2026-28363 (CVSS 9.9) and CVE-2026-25253 (CVSS 8.8). Keep OpenClaw updated.
+</div>
+
+<ul>
+  <li>Run <code>openclaw security audit --fix</code> regularly (weekly minimum)</li>
+  <li>Monitor the OpenClaw GitHub security advisories</li>
+  <li>Review SOUL.md/MEMORY.md periodically for injected content (memory poisoning attacks)</li>
+  <li>Check logs for suspicious activity</li>
+</ul>
+
+<a href="#toc" class="back-top">&uarr; Back to top</a>
+
+<!-- ===== PART 2 ===== -->
+<h2 class="part-heading" id="part-2">Part 2: Top 20 Use Cases with Risk Assessments</h2>
+
+<div class="use-case">
+  <h4><span class="uc-number">1</span> Email Triage &amp; Morning Briefing</h4>
+  <div class="uc-meta"><span class="risk-high">HIGH RISK</span> <span class="time-saved">30&ndash;45 min/day saved</span></div>
+  <p>OpenClaw reads your inbox, summarizes emails by priority, and sends you a digest via Telegram/Signal each morning.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Email contents (potentially sensitive/confidential) sent to an external LLM API</li>
+    <li>Email credentials stored locally could be exfiltrated via prompt injection</li>
+    <li>Malicious emails could contain prompt injection payloads that hijack the agent</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Use a read-only email app password / OAuth token with minimal scopes</li>
+    <li>Filter out emails from unknown senders before processing</li>
+    <li>Use a dedicated email account for testing initially</li>
+    <li>Consider a local LLM (Llama, Mistral) to keep data on-premise</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">2</span> Calendar Management &amp; Scheduling</h4>
+  <div class="uc-meta"><span class="risk-medium">MEDIUM RISK</span> <span class="time-saved">15&ndash;30 min/day saved</span></div>
+  <p>Auto-schedule meetings, detect conflicts, send scheduling links, and provide daily agenda briefings.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Calendar data reveals your location, contacts, and daily patterns</li>
+    <li>Write access could delete or modify meetings (accidentally or via injection)</li>
+    <li>Meeting details sent to LLM API</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Start with read-only calendar access</li>
+    <li>Require human confirmation for any write operations</li>
+    <li>Use scoped OAuth tokens</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">3</span> Code Review &amp; PR Summaries</h4>
+  <div class="uc-meta"><span class="risk-medium">MEDIUM RISK</span> <span class="time-saved">1&ndash;2 hrs/day saved</span></div>
+  <p>Automatically summarize PRs, flag potential issues, and post review comments on GitHub.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Source code (potentially proprietary) sent to external LLM</li>
+    <li>Write access to GitHub could merge bad PRs or delete branches</li>
+    <li>Prompt injection via malicious PR descriptions or code comments</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Use a GitHub token scoped to specific repos with minimal permissions</li>
+    <li>Never grant merge/admin permissions to the agent&rsquo;s token</li>
+    <li>Review agent-generated comments before they&rsquo;re posted</li>
+    <li>For proprietary code, use a local LLM or provider with a DPA</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">4</span> Automated DevOps &amp; Deployment</h4>
+  <div class="uc-meta"><span class="risk-very-high">VERY HIGH RISK</span> <span class="time-saved">1&ndash;3 hrs/day saved</span></div>
+  <p>Run test suites, deploy to staging/production, monitor CI/CD pipelines via chat commands.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Shell command execution on your infrastructure &mdash; the most dangerous capability</li>
+    <li>A compromised agent could deploy malicious code, delete databases, or exfiltrate secrets</li>
+    <li>Production credentials exposed to the agent</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li><strong>NEVER</strong> give the agent production deployment access directly</li>
+    <li>Use a dedicated CI/CD service as an intermediary &mdash; agent triggers, CI deploys</li>
+    <li>Restrict exec permissions to a whitelist of safe commands</li>
+    <li>Use staging-only access initially</li>
+    <li>Require human approval for any deployment actions</li>
+    <li>Run the agent in a container with no network access to production systems</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">5</span> Meeting Transcription &amp; Action Items</h4>
+  <div class="uc-meta"><span class="risk-high">HIGH RISK</span> <span class="time-saved">30&ndash;60 min/meeting saved</span></div>
+  <p>Transcribe meeting recordings, extract action items, and email summaries to participants.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Meeting recordings contain sensitive business discussions</li>
+    <li>Audio/transcription data sent to external APIs</li>
+    <li>Action items could be mis-attributed or fabricated (hallucination)</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Use local transcription (Whisper) before sending text to LLM</li>
+    <li>Review action items before sending to participants</li>
+    <li>Get consent from all meeting participants</li>
+    <li>Consider legal/compliance requirements for recording</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">6</span> Social Media Content &amp; Scheduling</h4>
+  <div class="uc-meta"><span class="risk-medium">MEDIUM RISK</span> <span class="time-saved">5&ndash;10 hrs/week saved</span></div>
+  <p>Generate platform-specific posts from blog content, schedule posts, and manage multiple accounts.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Agent could post inappropriate/incorrect content under your brand</li>
+    <li>Social media credentials exposed</li>
+    <li>Generated content could contain hallucinations or plagiarized text</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Always require human approval before posting</li>
+    <li>Use a content queue/draft system, not direct posting</li>
+    <li>Use platform-specific API tokens with limited scopes</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">7</span> Research &amp; Web Monitoring</h4>
+  <div class="uc-meta"><span class="risk-low-medium">LOW-MEDIUM RISK</span> <span class="time-saved">1&ndash;2 hrs/day saved</span></div>
+  <p>Monitor specific topics, competitors, or news sources and provide summarized briefings.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Web browsing exposes the agent to prompt injection via malicious web content</li>
+    <li>Headless browser could be exploited to visit phishing sites</li>
+    <li>Research summaries may contain hallucinations presented as facts</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Run the browser in a sandboxed container (Chromium in Docker)</li>
+    <li>Restrict browsing to a whitelist of trusted domains</li>
+    <li>Cross-reference important findings manually</li>
+    <li>Disable JavaScript execution for simple content scraping</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">8</span> Personal Finance Tracking</h4>
+  <div class="uc-meta"><span class="risk-very-high">VERY HIGH RISK</span> <span class="time-saved">2&ndash;3 hrs/week saved</span></div>
+  <p>Aggregate bank transactions, categorize spending, generate budget reports.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Financial data is extremely sensitive &mdash; bank credentials, transaction history, account numbers</li>
+    <li>Data sent to external LLM API could be logged or breached</li>
+    <li>Compromised agent could initiate transfers if write access is granted</li>
+    <li>Regulatory implications (PCI-DSS, financial data protection laws)</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Use read-only bank API access (Plaid with read-only scope)</li>
+    <li><strong>NEVER</strong> grant transfer/payment capabilities</li>
+    <li>Use a local LLM &mdash; do not send financial data to cloud APIs</li>
+    <li>Export transactions as CSV and process offline</li>
+    <li>Encrypt all stored financial data at rest</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">9</span> Customer Support Triage</h4>
+  <div class="uc-meta"><span class="risk-high">HIGH RISK</span> <span class="time-saved">3&ndash;5 hrs/day saved</span></div>
+  <p>Monitor support channels, categorize issues, draft responses, escalate urgent items.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Customer PII sent to external LLM</li>
+    <li>Incorrect auto-responses could damage customer relationships</li>
+    <li>Prompt injection via customer messages could hijack the agent</li>
+    <li>GDPR/CCPA compliance issues</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Always require human approval for outgoing responses</li>
+    <li>Strip PII before sending to LLM (use regex/NER pre-processing)</li>
+    <li>Use an LLM provider with a DPA (Data Processing Agreement)</li>
+    <li>Log all agent actions for audit trail</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">10</span> Document Drafting &amp; Editing</h4>
+  <div class="uc-meta"><span class="risk-medium">MEDIUM RISK</span> <span class="time-saved">2&ndash;5 hrs/week saved</span></div>
+  <p>Draft contracts, proposals, reports from templates and context.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Confidential business information sent to LLM API</li>
+    <li>Hallucinated legal/financial terms could have real consequences</li>
+    <li>Document content stored in agent memory could leak across sessions</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Never use for final legal documents without lawyer review</li>
+    <li>Clear agent memory after processing sensitive documents</li>
+    <li>Use document templates to constrain output</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">11</span> Smart Home Automation</h4>
+  <div class="uc-meta"><span class="risk-high">HIGH RISK</span> <span class="time-saved">15&ndash;30 min/day saved</span></div>
+  <p>Control lights, thermostats, locks, cameras via natural language through messaging apps.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Physical security implications &mdash; agent could unlock doors, disable cameras</li>
+    <li>Smart home credentials exposed to the agent</li>
+    <li>Prompt injection could trigger physical actions</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Never connect door locks or security systems to OpenClaw</li>
+    <li>Limit to non-critical devices (lights, thermostats, speakers)</li>
+    <li>Require 2FA or physical confirmation for security-related actions</li>
+    <li>Use a separate smart home hub with its own auth layer</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">12</span> Expense Report Automation</h4>
+  <div class="uc-meta"><span class="risk-medium">MEDIUM RISK</span> <span class="time-saved">2&ndash;3 hrs/week saved</span></div>
+  <p>Scan receipts, categorize expenses, fill out expense report forms, submit for approval.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Receipt images may contain personal credit card numbers</li>
+    <li>Incorrect categorization could cause tax/compliance issues</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Mask credit card numbers before processing</li>
+    <li>Always require human review before submission</li>
+    <li>Use local OCR (Tesseract) for receipt scanning</li>
+    <li>Maintain audit trail of all agent decisions</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">13</span> Data Entry &amp; Form Filling</h4>
+  <div class="uc-meta"><span class="risk-medium">MEDIUM RISK</span> <span class="time-saved">3&ndash;5 hrs/week saved</span></div>
+  <p>Extract data from PDFs/emails and populate spreadsheets, CRMs, or databases.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Data accuracy &mdash; incorrect entries could propagate through systems</li>
+    <li>Write access to databases/CRMs is a significant attack surface</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Implement validation rules before any database writes</li>
+    <li>Use staging/draft records that require human approval</li>
+    <li>Log all changes with before/after values for rollback</li>
+    <li>Start with low-stakes data entry</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">14</span> Personal Knowledge Base / Second Brain</h4>
+  <div class="uc-meta"><span class="risk-low">LOW RISK</span> <span class="time-saved">1&ndash;2 hrs/day saved</span></div>
+  <p>Automatically organize notes, bookmarks, highlights into a searchable knowledge base (Notion, Obsidian).</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Personal notes sent to external LLM for processing</li>
+    <li>Memory poisoning &mdash; malicious content injected into your knowledge base</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Use a local LLM for processing personal notes</li>
+    <li>Periodically review the knowledge base for suspicious content</li>
+    <li>Keep original source material alongside AI summaries</li>
+    <li>Use read-only access to source apps where possible</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">15</span> Competitive Intelligence</h4>
+  <div class="uc-meta"><span class="risk-low-medium">LOW-MEDIUM RISK</span> <span class="time-saved">3&ndash;5 hrs/week saved</span></div>
+  <p>Monitor competitor websites, pricing, job postings, press releases, and social media activity.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Web scraping may violate terms of service</li>
+    <li>Competitor websites could contain prompt injection</li>
+    <li>Legal risk if scraping crosses into unauthorized access</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Only monitor publicly available information</li>
+    <li>Verify critical intelligence manually</li>
+    <li>Use sandboxed browser with restricted JavaScript</li>
+    <li>Consult legal counsel on scraping legality</li>
+    <li>Label all AI-generated insights as unverified</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">16</span> Automated Reporting &amp; Dashboards</h4>
+  <div class="uc-meta"><span class="risk-medium">MEDIUM RISK</span> <span class="time-saved">3&ndash;5 hrs/week saved</span></div>
+  <p>Pull data from multiple sources, generate weekly/monthly reports.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Business metrics and KPIs sent to external LLM</li>
+    <li>Incorrect data aggregation could lead to bad decisions</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Use read-only database replicas or API tokens</li>
+    <li>Validate generated reports against known benchmarks</li>
+    <li>Use pre-built SQL queries rather than letting the agent write arbitrary queries</li>
+    <li>Review reports before distribution</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">17</span> Language Translation &amp; Localization</h4>
+  <div class="uc-meta"><span class="risk-low">LOW RISK</span> <span class="time-saved">2&ndash;4 hrs/week saved</span></div>
+  <p>Translate documents, emails, and content between languages with context awareness.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Confidential documents sent to external LLM</li>
+    <li>Mistranslations in legal/medical/technical contexts could be serious</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Have native speakers review critical translations</li>
+    <li>Use domain-specific glossaries to improve accuracy</li>
+    <li>Never use for legally binding translations without professional review</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">18</span> Automated Testing &amp; QA</h4>
+  <div class="uc-meta"><span class="risk-medium">MEDIUM RISK</span> <span class="time-saved">2&ndash;4 hrs/day saved</span></div>
+  <p>Generate test cases, run test suites, report bugs, and track regression.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Source code and test data sent to external LLM</li>
+    <li>Shell command execution for running tests</li>
+    <li>Generated tests may create false confidence</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Use sanitized test data only</li>
+    <li>Restrict exec permissions to test commands only</li>
+    <li>Review generated test cases before adding to test suite</li>
+    <li>Run in an isolated CI environment</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">19</span> Invoice Processing &amp; Accounts Payable</h4>
+  <div class="uc-meta"><span class="risk-high">HIGH RISK</span> <span class="time-saved">5&ndash;10 hrs/week saved</span></div>
+  <p>Extract data from invoices, match to POs, route for approval, update accounting system.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Financial documents contain sensitive vendor and company info</li>
+    <li>Incorrect processing could result in wrong payments</li>
+    <li>Fraudulent invoices could bypass detection if agent is compromised</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Always require human approval for payment-related actions</li>
+    <li>Multi-person approval for amounts above a threshold</li>
+    <li>Use local processing for OCR/extraction</li>
+    <li>Cross-reference invoices against PO database automatically</li>
+    <li>Maintain complete audit trail</li>
+  </ul>
+</div>
+
+<div class="use-case">
+  <h4><span class="uc-number">20</span> Personal Health &amp; Fitness Tracking</h4>
+  <div class="uc-meta"><span class="risk-high">HIGH RISK</span> <span class="time-saved">30&ndash;60 min/day saved</span></div>
+  <p>Aggregate health data from wearables, track habits, generate wellness reports.</p>
+  <div class="section-label">Risks</div>
+  <ul>
+    <li>Health data is extremely sensitive (HIPAA, GDPR special category)</li>
+    <li>Incorrect health advice could be harmful</li>
+    <li>Wearable data includes location, heart rate, sleep patterns</li>
+    <li>Health data could be used for insurance discrimination</li>
+  </ul>
+  <div class="section-label">Mitigations</div>
+  <ul>
+    <li>Use a local LLM exclusively &mdash; never send health data to cloud APIs</li>
+    <li>Never act on AI health suggestions without consulting a healthcare professional</li>
+    <li>Use read-only access to health platforms</li>
+    <li>Anonymize/aggregate data before processing</li>
+  </ul>
+</div>
+
+<a href="#toc" class="back-top">&uarr; Back to top</a>
+
+<!-- ===== PART 3 ===== -->
+<h2 class="part-heading" id="part-3">Part 3: Risk Summary Matrix</h2>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Risk Level</th><th>Use Cases</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="risk-very-high" style="padding:0.15rem 0.5rem;border-radius:99px;font-weight:600;font-size:0.8rem;">VERY HIGH</span></td><td>#4 DevOps/Deployment, #8 Personal Finance</td></tr>
+      <tr><td><span class="risk-high" style="padding:0.15rem 0.5rem;border-radius:99px;font-weight:600;font-size:0.8rem;">HIGH</span></td><td>#1 Email, #5 Meeting Transcription, #9 Customer Support, #11 Smart Home, #19 Invoice Processing, #20 Health Tracking</td></tr>
+      <tr><td><span class="risk-medium" style="padding:0.15rem 0.5rem;border-radius:99px;font-weight:600;font-size:0.8rem;">MEDIUM</span></td><td>#2 Calendar, #3 Code Review, #6 Social Media, #10 Documents, #12 Expenses, #13 Data Entry, #16 Reporting, #18 Testing</td></tr>
+      <tr><td><span class="risk-low-medium" style="padding:0.15rem 0.5rem;border-radius:99px;font-weight:600;font-size:0.8rem;">LOW-MEDIUM</span></td><td>#7 Research/Monitoring, #15 Competitive Intel</td></tr>
+      <tr><td><span class="risk-low" style="padding:0.15rem 0.5rem;border-radius:99px;font-weight:600;font-size:0.8rem;">LOW</span></td><td>#14 Knowledge Base, #17 Translation</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<a href="#toc" class="back-top">&uarr; Back to top</a>
+
+<!-- ===== PART 4 ===== -->
+<h2 class="part-heading" id="part-4">Part 4: Universal Security Principles</h2>
+
+<ol class="checklist">
+  <li><strong>Start small</strong>: Begin with low-risk use cases (#14, #17, #7) and build confidence</li>
+  <li><strong>Principle of least privilege</strong>: Every integration gets the minimum permissions needed</li>
+  <li><strong>Human in the loop</strong>: Require approval for all write/send/deploy actions initially</li>
+  <li><strong>Defense in depth</strong>: Container + firewall + auth + scoped tokens + monitoring</li>
+  <li><strong>Assume compromise</strong>: Design your setup so that even if the agent is hijacked, the blast radius is limited</li>
+  <li><strong>Local LLMs for sensitive data</strong>: Use Ollama + Llama/Mistral for financial, health, or confidential data</li>
+  <li><strong>Regular audits</strong>: Run <code>openclaw security audit</code> weekly, review memory files monthly</li>
+  <li><strong>Stay updated</strong>: 60+ CVEs in 4 months (including CVSS 9.9) &mdash; always run the latest version</li>
+  <li><strong>Vet all skills</strong>: Never install unaudited third-party skills (~20% of ClawHub skills were malicious)</li>
+  <li><strong>Monitor costs</strong>: Set API spending limits to detect exfiltration-via-API-abuse early</li>
+</ol>
+
+<a href="#toc" class="back-top">&uarr; Back to top</a>
+
+<!-- ===== PART 5 ===== -->
+<h2 class="part-heading" id="part-5">Part 5: Verification Checklist</h2>
+
+<p>After setup, verify security by:</p>
+
+<ol class="checklist">
+  <li>Running <code>openclaw security audit --fix</code> and confirming zero findings</li>
+  <li>Port scanning your host to confirm 18789 is not externally accessible</li>
+  <li>Testing that the gateway rejects unauthenticated WebSocket connections</li>
+  <li>Verifying API key spending limits are set</li>
+  <li>Confirming mDNS is disabled (<code>OPENCLAW_DISABLE_BONJOUR=1</code>)</li>
+  <li>Testing a benign prompt injection to see if the agent&rsquo;s guardrails hold</li>
+  <li>Reviewing SOUL.md and MEMORY.md for any unexpected content</li>
+  <li>Verifying <code>allow_url_actions: false</code> in <code>openclaw.yaml</code> to block the one-click RCE vector</li>
+  <li>Confirming you&rsquo;re running version 2026.3.12+ (patches all known CVEs)</li>
+  <li>Testing that WebSocket connections from non-localhost origins are rejected</li>
+  <li>Verifying Docker container runs as non-root with <code>--cap-drop=ALL</code> and <code>--read-only</code></li>
+</ol>
+
+<a href="#toc" class="back-top">&uarr; Back to top</a>
+
+<!-- ===== PART 6 ===== -->
+<h2 class="part-heading" id="part-6">Part 6: Pentester / Whitehat Review</h2>
+
+<h3 id="s6-risk">Upgraded Risk Assessments</h3>
+<p>Based on the full CVE landscape and real-world attack data, these risk levels should be upgraded:</p>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Use Case</th><th>Original</th><th>Pentester</th><th>Justification</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>#3 Code Review</td><td>MEDIUM</td><td><strong>HIGH</strong></td><td>Prompt injection via PR descriptions is a proven vector; source code exfiltration is high-value</td></tr>
+      <tr><td>#7 Research</td><td>LOW-MED</td><td><strong>MED-HIGH</strong></td><td>Web browsing is the #1 indirect prompt injection vector</td></tr>
+      <tr><td>#14 Knowledge Base</td><td>LOW</td><td><strong>MEDIUM</strong></td><td>Memory poisoning makes this a persistence vector for attackers</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3 id="s6-vectors">Critical Attack Vectors Missing from Original Guide</h3>
+
+<h4>1. The &ldquo;Lethal Trifecta&rdquo; (Penligent/OctoClaw research)</h4>
+<p>The combination of System Access + Execution Power + Untrusted Ingestion creates a perfect storm. Most OpenClaw setups have all three by default. <strong>Never combine all three in a single agent instance.</strong> Use separate agents with different permission levels.</p>
+
+<h4>2. Time-Shifted Memory Poisoning (Palo Alto Networks)</h4>
+<p>Malicious inputs written to SOUL.md/MEMORY.md can appear benign at ingestion but &ldquo;detonate&rdquo; later when the agent&rsquo;s state aligns &mdash; logic bomb-style. Palo Alto mapped OpenClaw to <strong>every category in the OWASP Top 10 for Agentic Applications</strong>.</p>
+<p><em>Mitigation</em>: Treat memory files as code, not data. Use file integrity monitoring (FIM), enforce read-only permissions during runtime, require admin approval for memory file changes.</p>
+
+<h4>3. Log Poisoning &rarr; Indirect Prompt Injection</h4>
+<p>Attackers can write malicious content to log files via WebSocket requests. Since the agent reads its own logs, this is an injection vector. <em>Mitigation</em>: Ensure logs are write-only from the agent&rsquo;s perspective; use a separate log viewer.</p>
+
+<h4>4. Container Escape via API</h4>
+<p>CVE-2026-25253&rsquo;s WebSocket hijacking works even inside Docker containers &mdash; the container boundary doesn&rsquo;t block it. A containerized install running a vulnerable image is just as exposed as bare-metal.</p>
+
+<h4>5. Localhost Trust Assumption (ClawJacked)</h4>
+<p>OpenClaw&rsquo;s gateway exempted localhost from rate limiting entirely. Browser JavaScript could brute-force the gateway at hundreds of guesses/second with no lockout and no logging.</p>
+
+<h3 id="s6-docker">Docker Hardening Deep Dive</h3>
+<pre><code># docker-compose.yml &mdash; hardened OpenClaw deployment
+version: '3.8'
+services:
+  openclaw:
+    image: openclaw/openclaw:2026.3.12  # Pin to patched version
+    read_only: true                      # Read-only root filesystem
+    cap_drop:
+      - ALL                              # Drop all Linux capabilities
+    security_opt:
+      - no-new-privileges:true           # Prevent privilege escalation
+      - seccomp=openclaw-seccomp.json    # Custom seccomp profile
+    user: "1000:1000"                    # Non-root user
+    ports:
+      - "127.0.0.1:18789:18789"         # Bind to loopback ONLY
+    volumes:
+      - ./config:/app/config:ro          # Config read-only
+      - ./data:/app/data                 # Data writable (minimal)
+    mem_limit: 2g                        # Memory cap
+    cpus: 1.0                            # CPU cap
+    networks:
+      - openclaw-internal
+
+  # Optional: egress proxy to restrict outbound traffic
+  egress-proxy:
+    image: nginx:alpine
+    # Allowlist only LLM API endpoints
+    networks:
+      - openclaw-internal
+      - external
+
+networks:
+  openclaw-internal:
+    internal: true   # No direct internet access for OpenClaw
+  external:
+    driver: bridge</code></pre>
+
+<p>Key points:</p>
+<ul>
+  <li><code>internal: true</code> network prevents the agent from reaching the internet directly &mdash; all traffic goes through an egress proxy</li>
+  <li>Even a fully compromised agent cannot exfiltrate data to arbitrary servers</li>
+  <li>Never mount <code>docker.sock</code> &mdash; it grants container escape</li>
+  <li>Never use <code>--network=host</code> &mdash; it removes network isolation entirely</li>
+</ul>
+
+<h3 id="s6-ir">Incident Response Plan</h3>
+<p>If you suspect compromise:</p>
+<ol>
+  <li><strong>Immediately</strong>: Disconnect OpenClaw from the network (stop container or kill process)</li>
+  <li><strong>Within 1 hour</strong>: Rotate ALL credentials the agent had access to</li>
+  <li><strong>Audit</strong>: Check logs for unexpected <code>system.run</code> calls; review <code>sandbox list</code> state</li>
+  <li><strong>Review</strong>: Examine SOUL.md/MEMORY.md for injected instructions</li>
+  <li><strong>Scan</strong>: Check for installed backdoor skills or modified skill files</li>
+  <li><strong>Report</strong>: If you find evidence of exploitation, report to OpenClaw security (GitHub Security Advisories)</li>
+</ol>
+
+<h3 id="s6-ratings">Pentester Mitigation Ratings by Use Case</h3>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Use Case</th><th>Rating</th><th>Key Gap</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>#1 Email</td><td><span class="risk-high" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">NEEDS IMPROVEMENT</span></td><td>Never open attachments via agent; email is the #1 injection delivery vector</td></tr>
+      <tr><td>#2 Calendar</td><td><span class="risk-low" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">SUFFICIENT</span></td><td>&mdash;</td></tr>
+      <tr><td>#3 Code Review</td><td><span class="risk-high" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">NEEDS IMPROVEMENT</span></td><td>Sanitize PR descriptions before LLM processing; use separate browser profile</td></tr>
+      <tr><td>#4 DevOps</td><td><span class="risk-low" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">SUFFICIENT</span></td><td>&mdash;</td></tr>
+      <tr><td>#5 Meetings</td><td><span class="risk-low" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">SUFFICIENT</span></td><td>&mdash;</td></tr>
+      <tr><td>#6 Social Media</td><td><span class="risk-low" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">SUFFICIENT</span></td><td>&mdash;</td></tr>
+      <tr><td>#7 Research</td><td><span class="risk-high" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">NEEDS IMPROVEMENT</span></td><td>Never browse in same session as OpenClaw Control UI</td></tr>
+      <tr><td>#8 Finance</td><td><span class="risk-low" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">SUFFICIENT</span></td><td>&mdash;</td></tr>
+      <tr><td>#9 Support</td><td><span class="risk-high" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">NEEDS IMPROVEMENT</span></td><td>Rate-limit outgoing responses; implement canary tokens</td></tr>
+      <tr><td>#10 Documents</td><td><span class="risk-low" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">SUFFICIENT</span></td><td>&mdash;</td></tr>
+      <tr><td>#11 Smart Home</td><td><span class="risk-high" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">NEEDS IMPROVEMENT</span></td><td>Should be VERY HIGH; physical security implications are severe</td></tr>
+      <tr><td>#12&ndash;13</td><td><span class="risk-low" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">SUFFICIENT</span></td><td>&mdash;</td></tr>
+      <tr><td>#14 Knowledge Base</td><td><span class="risk-high" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">NEEDS IMPROVEMENT</span></td><td>File integrity monitoring; memory poisoning is a real vector</td></tr>
+      <tr><td>#15&ndash;18</td><td><span class="risk-low" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">SUFFICIENT</span></td><td>&mdash;</td></tr>
+      <tr><td>#19 Invoices</td><td><span class="risk-high" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">NEEDS IMPROVEMENT</span></td><td>Anomaly detection on invoice amounts; AP workflows are a target</td></tr>
+      <tr><td>#20 Health</td><td><span class="risk-low" style="padding:0.1rem 0.4rem;border-radius:99px;font-weight:600;font-size:0.75rem;">SUFFICIENT</span></td><td>&mdash;</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3 id="s6-scale">Real-World Scale of the Problem</h3>
+<p>As of March 2026:</p>
+<ul>
+  <li><strong>220,000+</strong> OpenClaw instances exposed to the internet</li>
+  <li><strong>12,812</strong> confirmed exploitable via RCE</li>
+  <li><strong>63%</strong> of observed deployments were vulnerable</li>
+  <li><strong>60+ CVEs and 60+ GHSAs</strong> disclosed in ~4 months</li>
+  <li><strong>900+</strong> malicious ClawHub skills identified (Atomic Stealer payloads)</li>
+  <li><strong>Meta</strong> has banned OpenClaw from corporate devices</li>
+  <li><strong>China</strong> restricted OpenClaw in government agencies</li>
+  <li><strong>Palo Alto Networks</strong> called it &ldquo;the potential biggest insider threat of 2026&rdquo;</li>
+</ul>
+
+<a href="#toc" class="back-top">&uarr; Back to top</a>
+
+<!-- ===== PART 7 ===== -->
+<h2 class="part-heading" id="part-7">Part 7: OpenClaw vs Claude Code</h2>
+
+<h3>What is Claude Code?</h3>
+<p>Claude Code is Anthropic&rsquo;s official CLI and agentic coding tool. It runs in your terminal, IDE (VS Code, JetBrains), and now as a desktop app (Cowork). Unlike OpenClaw&rsquo;s messaging-app-first approach, Claude Code is purpose-built for software development with deep filesystem and git integration.</p>
+
+<h3>New in 2026: Channels &amp; Cowork</h3>
+<p><strong>Claude Code Channels</strong> (launched March 20, 2026): Bridges messaging platforms (Telegram, Discord, Slack) to your Claude Code CLI session. This directly competes with OpenClaw&rsquo;s core messaging-app model.</p>
+<p><strong>Claude Cowork</strong> (launched 2026): The desktop agent for knowledge workers. Same agentic architecture as Claude Code but with a desktop interface.</p>
+<p><strong>Agent Teams</strong> (experimental): Coordinates multiple Claude Code instances working together via <code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS</code>.</p>
+
+<h3>Head-to-Head Comparison</h3>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Dimension</th><th>Claude Code</th><th>OpenClaw</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Primary interface</td><td>Terminal + IDE + Desktop</td><td>Messaging apps (Signal, Telegram, WhatsApp, Discord)</td></tr>
+      <tr><td>Messaging integration</td><td>Channels (new March 2026)</td><td>Native, core architecture</td></tr>
+      <tr><td>Security model</td><td>Sandboxed; explicit per-action approval</td><td>Broad default permissions; you configure restrictions</td></tr>
+      <tr><td>Enterprise compliance</td><td>SOC 2, GDPR, SSO, RBAC, audit trails</td><td>None</td></tr>
+      <tr><td>CVEs (first 4 months)</td><td>Managed by Anthropic security</td><td>60+ CVEs, 60+ GHSAs, CVSS 9.9</td></tr>
+      <tr><td>LLM flexibility</td><td>Claude models only</td><td>Any LLM (Claude, GPT, DeepSeek, Llama, etc.)</td></tr>
+      <tr><td>Cost</td><td>~$20/month or API usage-based</td><td>Free (MIT) + LLM API costs</td></tr>
+      <tr><td>Multi-agent</td><td>Agent Teams (experimental)</td><td>Single agent with skill integrations</td></tr>
+      <tr><td>Coding depth</td><td>Purpose-built, git-native</td><td>General-purpose</td></tr>
+      <tr><td>Non-coding tasks</td><td>Cowork for knowledge work</td><td>Native strength (email, calendar, smart home, etc.)</td></tr>
+      <tr><td>Customization</td><td>CLAUDE.md, hooks, MCP servers</td><td>SKILL.md, SOUL.md, full source access</td></tr>
+      <tr><td>Self-hosting</td><td>No &mdash; Anthropic API</td><td>Yes &mdash; fully on your hardware</td></tr>
+      <tr><td>Supply chain risk</td><td>MCP servers (smaller ecosystem)</td><td>ClawHub (~20% malicious)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>When to Use Claude Code</h3>
+<ul>
+  <li><strong>Software development</strong>: Code review, refactoring, debugging, architecture</li>
+  <li><strong>Enterprise/regulated environments</strong>: SOC 2, GDPR, audit trails, SSO/RBAC</li>
+  <li><strong>Security-conscious teams</strong>: Sandboxed execution, managed by Anthropic&rsquo;s security team</li>
+  <li><strong>Git-heavy workflows</strong>: Native git integration, PR management</li>
+  <li><strong>Managed security</strong>: No CVE patching or infrastructure hardening required</li>
+</ul>
+
+<h3>When to Use OpenClaw</h3>
+<ul>
+  <li><strong>Life automation beyond coding</strong>: Email, calendar, smart home, finance, health</li>
+  <li><strong>Messaging-native workflows</strong>: If your team lives in Telegram/Signal/WhatsApp</li>
+  <li><strong>LLM flexibility</strong>: Local models, DeepSeek, or mixed providers</li>
+  <li><strong>Full data sovereignty</strong>: Run entirely on your hardware with local LLMs</li>
+  <li><strong>Maximum customization</strong>: Full source access, custom skills, custom personality</li>
+</ul>
+
+<div class="callout callout-info">
+  <strong>The emerging pattern: Use both</strong>
+  Many developers run Claude Code as their coding engine and OpenClaw for life/ops orchestration. Claude Code Channels gives you messaging-app access to a <em>coding agent</em>. OpenClaw gives you messaging-app access to a <em>general-purpose agent with system-level access</em>. The security implications of that distinction are enormous.
+</div>
+
+<a href="#toc" class="back-top">&uarr; Back to top</a>
+
+<!-- ===== PART 8 ===== -->
+<h2 class="part-heading" id="part-8">Part 8: Steinberger&rsquo;s Perspective</h2>
+
+<p><em>Based on Peter Steinberger&rsquo;s public statements &mdash; his blog (Feb 15, 2026), Pragmatic Engineer podcast, Lex Fridman #491, Fortune/TechCrunch/CNBC interviews, and GitHub activity.</em></p>
+
+<h3>His Philosophy: Empowerment, Not Containment</h3>
+<p>Steinberger positions OpenClaw as &ldquo;an AI that actually does things&rdquo; &mdash; a revolutionary tool for power users. His vision is building &ldquo;an agent that even my mum can use.&rdquo; He frames AI agents as a new skill: <em>&ldquo;You pick up the guitar &mdash; you&rsquo;re not going to be good at the guitar in the first day.&rdquo;</em> He calls this approach <strong>&ldquo;agentic engineering&rdquo;</strong> and explicitly distinguishes it from &ldquo;vibe coding.&rdquo;</p>
+
+<h3>Where Steinberger Would Push Back</h3>
+<ol>
+  <li><strong>The tone is too CISO-like</strong>: He&rsquo;d lead with the empowerment narrative before the risk narrative.</li>
+  <li><strong>Absolutist &ldquo;NEVER&rdquo; prohibitions</strong>: He favors graduated trust models over blanket bans. Instead of &ldquo;NEVER connect door locks,&rdquo; he&rsquo;d say &ldquo;start read-only, level up as you validate.&rdquo;</li>
+  <li><strong>The Microsoft quote</strong>: He&rsquo;d note this is Microsoft&rsquo;s external security team&rsquo;s view, not universal consensus. His entire pitch is that OpenClaw runs on YOUR machine.</li>
+  <li><strong>Model interchangeability</strong>: A core design principle &mdash; route sensitive tasks to local models and mundane tasks to cloud APIs on the same agent.</li>
+</ol>
+
+<h3>Where Steinberger Acknowledges the Risks</h3>
+<ul>
+  <li>Announced moving OpenClaw to an <strong>independent open-source foundation</strong> (Apache/PSF model) on Feb 14, 2026</li>
+  <li>Active in GitHub Security Advisory work, though critical of GitHub&rsquo;s reporting system as &ldquo;a mess&rdquo; with &ldquo;AI-generated slop&rdquo;</li>
+</ul>
+
+<h3>Uncomfortable Truths</h3>
+<ol>
+  <li><strong>ClawHavoc response was slow</strong>: Steinberger was criticized for saying he was &ldquo;too busy&rdquo; to address malicious skills. C2 infrastructure stayed operational for days.</li>
+  <li><strong>Community as security asset</strong>: ClawCon drew 1,000+ attendees; Cisco&rsquo;s DefenseClaw and VirusTotal scanning integration came from community contributions.</li>
+  <li><strong>One maintainer&rsquo;s candid warning</strong> (Discord): <em>&ldquo;If you can&rsquo;t understand how to run a command line, this is far too dangerous of a project for you to use safely.&rdquo;</em></li>
+</ol>
+
+<h3>The Balanced Take</h3>
+<p>Steinberger is more optimistic about OpenClaw&rsquo;s risk-reward tradeoff than the security community. This guide deliberately errs on the side of security researchers (Microsoft, Palo Alto Networks, Cisco). <strong>That&rsquo;s the right call for a security-focused setup guide.</strong> But Steinberger&rsquo;s graduated-trust approach (&ldquo;start minimal, expand carefully&rdquo;) is valid for experienced users who understand the risks.</p>
+
+<h3>Sources</h3>
+<ul class="sources">
+  <li><a href="https://steipete.me/posts/2026/openclaw" target="_blank" rel="noopener">OpenClaw, OpenAI and the future &mdash; steipete.me</a></li>
+  <li><a href="https://newsletter.pragmaticengineer.com/p/the-creator-of-clawd-i-ship-code" target="_blank" rel="noopener">&ldquo;I ship code I don&rsquo;t read&rdquo; &mdash; Pragmatic Engineer</a></li>
+  <li><a href="https://techcrunch.com/2026/02/15/openclaw-creator-peter-steinberger-joins-openai/" target="_blank" rel="noopener">OpenClaw creator joins OpenAI &mdash; TechCrunch</a></li>
+  <li><a href="https://fortune.com/2026/02/19/openclaw-who-is-peter-steinberger-openai-sam-altman-anthropic-moltbook/" target="_blank" rel="noopener">Who is Peter Steinberger? &mdash; Fortune</a></li>
+  <li><a href="https://cyberpress.org/clawhavoc-poisons-openclaws-clawhub-with-1184-malicious-skills/" target="_blank" rel="noopener">ClawHavoc Poisons ClawHub &mdash; CyberPress</a></li>
+  <li><a href="https://www.cryptopolitan.com/openclaw-founder-rips-github-mess/" target="_blank" rel="noopener">OpenClaw founder rips GitHub reporting &mdash; Cryptopolitan</a></li>
+  <li><a href="https://summify.io/discover/openclaw-the-viral-ai-agent-that-broke-the-internet-peter-st-YFjfBk/" target="_blank" rel="noopener">Lex Fridman #491 &mdash; Summify</a></li>
+</ul>
+
+<a href="#toc" class="back-top">&uarr; Back to top</a>
+
+<footer>
+  By Patrick Malone &middot; March 2026<br>
+  <a href="https://malone.gr">malone.gr</a> &middot; <a href="https://ainews.malone.gr">AI News Briefing</a>
+</footer>
+
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
