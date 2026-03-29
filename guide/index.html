@@ -209,7 +209,16 @@
         <li><a href="#part-7">Agent Teams</a></li>
       </ul>
     </li>
-    <li><a href="#part-8">Steinberger&rsquo;s Perspective</a></li>
+    <li><a href="#part-8">NemoClaw: OpenClaw with a Security Cage</a>
+      <ul class="toc-sub">
+        <li><a href="#s8-what">What is NemoClaw?</a></li>
+        <li><a href="#s8-safer">Is it actually safer?</a></li>
+        <li><a href="#s8-diff">OpenClaw vs NemoClaw</a></li>
+        <li><a href="#s8-install">Installing NemoClaw</a></li>
+        <li><a href="#s8-which">Which should you use?</a></li>
+      </ul>
+    </li>
+    <li><a href="#part-9">Steinberger&rsquo;s Perspective</a></li>
   </ol>
 </div>
 
@@ -1032,8 +1041,156 @@ networks:
 
 <a href="#toc" class="back-top">&uarr; Back to top</a>
 
-<!-- ===== PART 8: STEINBERGER ===== -->
-<h2 class="part-heading" id="part-8">Steinberger&rsquo;s Perspective</h2>
+<!-- ===== PART 8: NEMOCLAW ===== -->
+<h2 class="part-heading" id="part-8">NemoClaw: OpenClaw with a Security Cage</h2>
+
+<p>If you&rsquo;ve been reading this guide thinking &ldquo;OpenClaw sounds amazing but the security stuff scares me,&rdquo; NVIDIA built something specifically for you. It&rsquo;s called <strong>NemoClaw</strong>, announced at GTC 2026 on March 16 by Jensen Huang. It&rsquo;s free, open-source, and currently in alpha (very early) status.</p>
+
+<h3 id="s8-what">What Is NemoClaw, Exactly?</h3>
+
+<p>NemoClaw is <strong>not a replacement for OpenClaw</strong>. It&rsquo;s a security wrapper <em>around</em> OpenClaw. Think of it this way:</p>
+
+<blockquote>OpenClaw is the employee. NemoClaw is the building with locked doors, security cameras, and badge readers.</blockquote>
+
+<p>When you install NemoClaw, it takes OpenClaw and puts it inside a secure &ldquo;sandbox&rdquo; &mdash; an isolated environment on your computer where OpenClaw can do its work but can&rsquo;t wander into areas it shouldn&rsquo;t. It&rsquo;s still OpenClaw doing the actual work. NemoClaw just makes sure it stays in its lane.</p>
+
+<p>Here&rsquo;s what that means in practice:</p>
+<ul>
+  <li><strong>OpenClaw can&rsquo;t access your files</strong> outside of its designated folder. Your photos, documents, and personal files are off-limits unless you explicitly allow it.</li>
+  <li><strong>OpenClaw can&rsquo;t talk to the internet freely.</strong> By default, <em>all</em> internet access is blocked. You have to specifically approve each service it can reach &mdash; &ldquo;yes, you can talk to Telegram&rdquo; or &ldquo;yes, you can reach the Claude API.&rdquo; Everything else is denied.</li>
+  <li><strong>Your passwords never enter the sandbox.</strong> When OpenClaw needs to log into a service, the credentials are stored on the secure &ldquo;outside&rdquo; and injected at the point of use. Even a fully compromised agent can&rsquo;t steal them.</li>
+  <li><strong>Every action gets checked against your rules.</strong> Before OpenClaw actually does something, NemoClaw checks: &ldquo;Is this action allowed by the policies the user set up?&rdquo; If not, it blocks it.</li>
+</ul>
+
+<h3 id="s8-safer">Is NemoClaw Actually Safer?</h3>
+
+<p><strong>Significantly, yes.</strong> That was the whole point of building it. Here&rsquo;s why:</p>
+
+<p>Remember those scary security issues from earlier in this guide? The 60+ CVEs, the malicious skills, the exposed instances? NemoClaw addresses them at a fundamental level:</p>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Problem</th><th>OpenClaw</th><th>NemoClaw</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Malicious skill steals your data</td><td>Skill has full internet access; data goes to the attacker&rsquo;s server</td><td>All internet blocked except your approved list. Skill can&rsquo;t phone home.</td></tr>
+      <tr><td>Agent reads your personal files</td><td>Full access to everything on the computer by default</td><td>Can only access its own sandbox folder. Your files are invisible to it.</td></tr>
+      <tr><td>Passwords get exposed</td><td>Stored in config files the agent can read</td><td>Stored outside the sandbox. Agent never sees them.</td></tr>
+      <tr><td>Sensitive data sent to cloud AI</td><td>Everything goes to whichever AI you chose</td><td>Privacy router detects personal info and redirects to a local AI model instead.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>That last point is especially cool: NemoClaw includes a <strong>privacy router</strong>. When you send a message, it checks whether it contains personal information. If it does, the query gets automatically sent to a local AI model running on your own hardware &mdash; it never leaves your computer. Non-sensitive queries can go to faster cloud AI. You get the best of both worlds without having to think about it.</p>
+
+<div class="callout callout-warning">
+  <strong>NemoClaw is brand new</strong>
+  It was released March 16, 2026 &mdash; less than two weeks old at the time of writing. It&rsquo;s alpha software with rough edges. Users report hours of troubleshooting during setup, and NVIDIA explicitly warns it&rsquo;s not production-ready. It&rsquo;s the right direction, but expect bumps.
+</div>
+
+<h3 id="s8-diff">OpenClaw vs NemoClaw: The Differences That Matter</h3>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th></th><th>OpenClaw</th><th>NemoClaw</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Made by</strong></td><td>OpenClaw community</td><td>NVIDIA</td></tr>
+      <tr><td><strong>What it is</strong></td><td>The AI agent itself</td><td>A security cage <em>around</em> OpenClaw</td></tr>
+      <tr><td><strong>Default security</strong></td><td>Permissive &mdash; everything allowed unless you restrict it</td><td>Locked down &mdash; everything blocked unless you allow it</td></tr>
+      <tr><td><strong>Internet access</strong></td><td>Agent can reach anything</td><td>Only services you explicitly approve</td></tr>
+      <tr><td><strong>File access</strong></td><td>Full access to your computer</td><td>Restricted to its own sandbox folder</td></tr>
+      <tr><td><strong>Passwords</strong></td><td>Accessible to the agent</td><td>Stored outside, never visible to the agent</td></tr>
+      <tr><td><strong>Personal data</strong></td><td>Sent wherever you configured</td><td>Auto-detected and routed to local AI when sensitive</td></tr>
+      <tr><td><strong>Skills</strong></td><td>Full ClawHub ecosystem</td><td>Same skills, but sandboxed &mdash; malicious ones can&rsquo;t do as much damage</td></tr>
+      <tr><td><strong>AI models</strong></td><td>Any model</td><td>Any model, plus NVIDIA&rsquo;s own Nemotron models optimized for local use</td></tr>
+      <tr><td><strong>Setup difficulty</strong></td><td>Moderate</td><td>Harder &mdash; requires Docker and more configuration</td></tr>
+      <tr><td><strong>Maturity</strong></td><td>~4 months old, large community</td><td>~2 weeks old, alpha quality</td></tr>
+      <tr><td><strong>Cost</strong></td><td>Free + AI API costs</td><td>Free + AI API costs (or free local inference with Nemotron)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3 id="s8-install">Installing NemoClaw</h3>
+
+<p>NemoClaw is harder to install than plain OpenClaw because it has more moving parts (the sandbox, the inference router, the policy engine). But the process is mostly automated.</p>
+
+<h4>What You Need</h4>
+<ul>
+  <li>A computer with at least <strong>8 GB of RAM</strong> (16 GB recommended) and <strong>20 GB of free disk space</strong></li>
+  <li><strong>Mac</strong> (Apple Silicon &mdash; M1/M2/M3/M4), <strong>Linux</strong> (Ubuntu 22.04+), or <strong>Windows</strong> (via WSL). Intel Macs are not supported.</li>
+  <li><strong>Docker</strong> installed and running &mdash; this is the software that creates the secure sandbox.
+    <ul>
+      <li>On Mac: Install <a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener">Docker Desktop</a> (free for personal use) and make sure it&rsquo;s running (look for the whale icon in your menu bar)</li>
+      <li>On Linux: Docker is usually pre-installed or one command away (<code>sudo apt install docker.io</code>)</li>
+      <li>On Windows: Install Docker Desktop with WSL backend</li>
+    </ul>
+  </li>
+</ul>
+
+<h4>Step by Step</h4>
+
+<ol class="checklist">
+  <li>
+    <strong>Open a terminal</strong> (on Mac, search for &ldquo;Terminal&rdquo; in Spotlight; on Windows, open PowerShell or WSL).
+  </li>
+  <li>
+    <strong>Run the installer.</strong> Copy and paste this single line:
+    <pre><code>curl -fsSL https://www.nvidia.com/nemoclaw.sh | bash</code></pre>
+    <p>This downloads and runs NVIDIA&rsquo;s setup script. It will take a few minutes &mdash; it&rsquo;s downloading the sandbox image (~2.4 GB) and setting things up.</p>
+  </li>
+  <li>
+    <strong>Follow the setup wizard.</strong> It will ask you:
+    <ul>
+      <li>Which AI model provider to use (Claude, GPT, NVIDIA&rsquo;s own models, or a local model)</li>
+      <li>Your API key for that provider</li>
+      <li>Which messaging app to connect (Telegram, Discord, etc.)</li>
+    </ul>
+    <p>Just follow the prompts &mdash; the wizard walks you through each step.</p>
+  </li>
+  <li>
+    <strong>Connect to your agent:</strong>
+    <pre><code>nemoclaw my-assistant connect</code></pre>
+    <p>This opens the OpenClaw interface running inside its secure sandbox.</p>
+  </li>
+  <li>
+    <strong>Start chatting.</strong> Open Telegram or Discord on your phone and send a message to your bot. NemoClaw is running OpenClaw behind the scenes, but now with all the security guardrails in place.
+  </li>
+</ol>
+
+<div class="callout callout-info">
+  <strong>Expect some troubleshooting</strong>
+  NemoClaw is alpha software. Common gotchas: Docker not running (start Docker Desktop first), not enough RAM (you need 8 GB minimum), and network policies blocking services you need (you may need to edit a config file to allow specific websites). The <a href="https://github.com/NVIDIA/NemoClaw/issues" target="_blank" rel="noopener">GitHub Issues page</a> is active and helpful.
+</div>
+
+<h3 id="s8-which">Should You Use OpenClaw or NemoClaw?</h3>
+
+<p><strong>Use NemoClaw if:</strong></p>
+<ul>
+  <li>Security is your top concern &mdash; you want deny-by-default protection</li>
+  <li>You handle sensitive data (health, financial, personal) and want the privacy router</li>
+  <li>You have NVIDIA hardware and want optimized local AI inference</li>
+  <li>You&rsquo;re comfortable with a rougher setup experience in exchange for better security</li>
+  <li>You want to use OpenClaw skills but don&rsquo;t trust ClawHub&rsquo;s safety track record</li>
+</ul>
+
+<p><strong>Use plain OpenClaw if:</strong></p>
+<ul>
+  <li>You want the simplest setup experience</li>
+  <li>You&rsquo;re on an Intel Mac (NemoClaw doesn&rsquo;t support it)</li>
+  <li>You&rsquo;re experimenting and learning &mdash; the lower complexity helps</li>
+  <li>You don&rsquo;t want the overhead of Docker and containers</li>
+  <li>You want mature, more battle-tested software (NemoClaw is weeks old)</li>
+</ul>
+
+<p><strong>The bottom line:</strong> If OpenClaw is a powerful sports car, NemoClaw adds roll cages, airbags, and a speed limiter. It&rsquo;s the same car, but designed so that when things go wrong &mdash; and with software this complex, they eventually will &mdash; the damage is contained. As it matures past alpha, NemoClaw will likely become the recommended way to run OpenClaw for anyone who cares about security.</p>
+
+<a href="#toc" class="back-top">&uarr; Back to top</a>
+
+<!-- ===== PART 9: STEINBERGER ===== -->
+<h2 class="part-heading" id="part-9">Steinberger&rsquo;s Perspective</h2>
 
 <p><em>Based on Peter Steinberger&rsquo;s public statements &mdash; his blog (Feb 15, 2026), Pragmatic Engineer podcast, Lex Fridman #491, Fortune/TechCrunch/CNBC interviews, and GitHub activity.</em></p>
 
