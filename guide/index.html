@@ -200,7 +200,14 @@
         <li><a href="#s6-scale">Real-World Scale</a></li>
       </ul>
     </li>
-    <li><a href="#part-7">OpenClaw vs Claude Code</a></li>
+    <li><a href="#part-7">OpenClaw vs Claude Code</a>
+      <ul class="toc-sub">
+        <li><a href="#part-7">Channels: messaging comparison</a></li>
+        <li><a href="#part-7">Cowork: desktop agent</a></li>
+        <li><a href="#part-7">Dispatch: remote control</a></li>
+        <li><a href="#part-7">Agent Teams</a></li>
+      </ul>
+    </li>
     <li><a href="#part-8">Steinberger&rsquo;s Perspective</a></li>
   </ol>
 </div>
@@ -915,36 +922,111 @@ networks:
 <!-- ===== PART 7: VS CLAUDE CODE ===== -->
 <h2 class="part-heading" id="part-7">OpenClaw vs Claude Code</h2>
 
-<h3>What is Claude Code?</h3>
-<p>Claude Code is Anthropic&rsquo;s official CLI and agentic tool. It runs in your terminal, IDE, and as a desktop app (Cowork). Unlike OpenClaw&rsquo;s messaging-first approach, Claude Code is purpose-built for software development and knowledge work.</p>
+<p>Anthropic has been building features that, piece by piece, cover much of what OpenClaw does &mdash; but within a managed, secure, Claude-only ecosystem. Here&rsquo;s how all the pieces fit together.</p>
 
-<h3>Head-to-Head Comparison</h3>
+<h3>The Claude Ecosystem at a Glance</h3>
+
+<p>Anthropic now has three main products that overlap with OpenClaw in different ways:</p>
+
+<ul>
+  <li><strong>Claude Code</strong> &mdash; A command-line tool for developers. Lives in your terminal or code editor. Reads and writes code, runs commands, manages git.</li>
+  <li><strong>Claude Cowork</strong> &mdash; A desktop app for everyone else. Lives on your Mac or PC. Handles documents, files, spreadsheets, research &mdash; knowledge work that doesn&rsquo;t require coding.</li>
+  <li><strong>Claude Channels</strong> &mdash; A plugin system that lets you talk to Claude Code through messaging apps like Telegram and Discord &mdash; the most direct competitor to OpenClaw&rsquo;s core concept.</li>
+</ul>
+
+<h3>Channels: Anthropic&rsquo;s Answer to OpenClaw&rsquo;s Chat Model</h3>
+
+<p>This is the feature that most directly competes with OpenClaw. Launched March 20, 2026 as a research preview.</p>
+
+<p><strong>How it works:</strong> You install a messaging plugin (currently Telegram, Discord, or iMessage), connect it to your Claude Code session, and then you can text Claude from your phone just like you&rsquo;d text OpenClaw. Claude receives your message, does work on your computer using its full environment (your files, code, tools), and replies back in the same chat.</p>
+
+<p><strong>The key difference from OpenClaw:</strong> When a message arrives through Channels, Claude already has deep context about your project &mdash; it can see your files, your git history, your installed tools. OpenClaw&rsquo;s messaging is its <em>native</em> interface &mdash; it was built messaging-first &mdash; but it operates as a separate layer making API calls without that deep local environment integration.</p>
+
+<p>Think of it this way: OpenClaw is like texting a personal assistant who has keys to many rooms in your house. Channels is like texting a specialist who&rsquo;s already sitting at your desk with all your files open. The specialist knows more about what&rsquo;s in front of them, but the assistant can go to more places.</p>
+
+<p><strong>Where OpenClaw still wins:</strong></p>
+<ul>
+  <li><strong>Platform coverage</strong> &mdash; OpenClaw supports Signal, WhatsApp, Slack, Teams, Telegram, Discord, and iMessage. Channels currently only supports Telegram, Discord, and iMessage.</li>
+  <li><strong>Always on</strong> &mdash; OpenClaw runs as a background service, always ready. Channels requires an active Claude Code session to be running on your computer.</li>
+  <li><strong>Any AI model</strong> &mdash; OpenClaw works with Claude, GPT, local models, anything. Channels is Claude-only.</li>
+  <li><strong>Breadth of integrations</strong> &mdash; OpenClaw has 50+ service integrations (smart home, email, calendar, fitness). Channels inherits whatever tools Claude Code has access to, which is powerful for dev work but doesn&rsquo;t natively connect to your Nest thermostat.</li>
+</ul>
+
+<p><strong>Where Channels wins:</strong></p>
+<ul>
+  <li><strong>Security</strong> &mdash; Sender allowlists with pairing codes. Enterprise admins can control which plugins are allowed. OpenClaw has nothing comparable.</li>
+  <li><strong>Deep environment integration</strong> &mdash; Full access to your project files, git, and development tools. OpenClaw treats your computer as one of many services it connects to; Claude Code treats it as home base.</li>
+  <li><strong>No CVE anxiety</strong> &mdash; Managed by Anthropic&rsquo;s security team.</li>
+</ul>
+
+<h3>Cowork: The Desktop Agent for Non-Coders</h3>
+
+<p>If Claude Code is for developers, Cowork is for everyone else. It&rsquo;s a desktop app (runs inside the Claude Desktop app) where you give Claude access to a folder on your computer and tell it what to do.</p>
+
+<p><strong>What it can do:</strong> You hand it a pile of documents and say &ldquo;organize these into a summary report&rdquo; or &ldquo;extract all the key dates from these contracts into a spreadsheet.&rdquo; It reads files, creates new ones, and even interacts with other apps on your screen (browsers, Excel, dashboards) to complete multi-step tasks. You come back to a finished deliverable.</p>
+
+<p><strong>How it compares to OpenClaw:</strong> Both aim to be &ldquo;AI that does things, not just answers questions.&rdquo; But they live in completely different worlds:</p>
+
+<ul>
+  <li><strong>OpenClaw</strong> automates your <em>life</em> &mdash; email, calendar, smart home, meals, fitness, travel. You interact through messaging apps throughout your day.</li>
+  <li><strong>Cowork</strong> automates your <em>desk work</em> &mdash; documents, files, research, data. You interact through the desktop app when you&rsquo;re at your computer.</li>
+</ul>
+
+<p>They don&rsquo;t really compete &mdash; they serve different moments in your day.</p>
+
+<h3>Dispatch: Text Your Computer from Anywhere</h3>
+
+<p>Dispatch is a feature built into Cowork that lets you text Claude from the Claude mobile app and have it do things on your computer while you&rsquo;re away. &ldquo;Pull together the notes from this week&rsquo;s meetings into a summary doc&rdquo; &mdash; sent from your phone at lunch, finished by the time you get back to your desk.</p>
+
+<p><strong>How it compares to OpenClaw&rsquo;s messaging:</strong> On the surface, Dispatch looks similar &mdash; you send a text, AI does work. But the differences matter:</p>
+
+<ul>
+  <li><strong>OpenClaw&rsquo;s messaging is universal</strong> &mdash; it works through Signal, Telegram, WhatsApp, any app you already use. Dispatch only works through the Claude mobile app.</li>
+  <li><strong>OpenClaw is always on</strong> &mdash; it runs as a service, always listening. Dispatch requires your Mac/PC to be awake with the Cowork app open.</li>
+  <li><strong>OpenClaw connects to your life</strong> &mdash; email, calendar, smart home, fitness. Dispatch works with files and apps on your desktop.</li>
+  <li><strong>Dispatch maintains a single conversation</strong> &mdash; Claude remembers what you talked about earlier. OpenClaw also has persistent memory (SOUL.md/MEMORY.md), but it&rsquo;s more like long-term memory than a continuous chat thread.</li>
+</ul>
+
+<p>Anthropic also offers <strong>scheduled tasks</strong> &mdash; you can set up recurring automations (&ldquo;every morning at 8am, summarize my unread emails&rdquo;). These can run on Anthropic&rsquo;s cloud servers even when your computer is off, which is something OpenClaw can&rsquo;t do without your own hardware being online. But OpenClaw&rsquo;s scheduling is broader &mdash; it can automate anything it has a skill for, not just desktop tasks.</p>
+
+<h3>Agent Teams: Multiple AIs Working Together</h3>
+
+<p>This is the most futuristic feature &mdash; and the one with the least OpenClaw overlap. Agent Teams lets you spin up multiple Claude Code instances that work on different parts of a problem simultaneously, communicate with each other, and coordinate through a shared task list. One might review code for security issues while another checks performance while a third writes tests.</p>
+
+<p>OpenClaw is fundamentally a single-agent system. It has a rich skills ecosystem that extends what one agent can do, but it can&rsquo;t coordinate multiple AI instances in parallel. Agent Teams solves a different problem entirely &mdash; complex technical work that benefits from parallel exploration.</p>
+
+<h3>The Big Picture Comparison</h3>
 <div class="table-wrap">
   <table>
     <thead>
-      <tr><th>Dimension</th><th>Claude Code</th><th>OpenClaw</th></tr>
+      <tr><th>Dimension</th><th>Claude Ecosystem</th><th>OpenClaw</th></tr>
     </thead>
     <tbody>
-      <tr><td>Primary interface</td><td>Terminal + IDE + Desktop</td><td>Messaging apps (Signal, Telegram, WhatsApp)</td></tr>
-      <tr><td>Security model</td><td>Sandboxed; explicit per-action approval</td><td>Broad defaults; you configure restrictions</td></tr>
-      <tr><td>CVEs (first 4 months)</td><td>Managed by Anthropic security</td><td>60+ CVEs, 60+ GHSAs</td></tr>
-      <tr><td>AI flexibility</td><td>Claude models only</td><td>Any model (Claude, GPT, local, etc.)</td></tr>
-      <tr><td>Cost</td><td>~$20/month or API-based</td><td>Free + AI API costs</td></tr>
-      <tr><td>Best for</td><td>Coding, technical work, knowledge work</td><td>Life automation, smart home, personal tasks</td></tr>
-      <tr><td>Data sovereignty</td><td>Data goes to Anthropic API</td><td>You choose: cloud or fully local</td></tr>
+      <tr><td>Chat from your phone</td><td>Channels (3 platforms) + Dispatch (Claude app only)</td><td>Native (7+ platforms &mdash; Signal, WhatsApp, Telegram, Discord, Slack, iMessage, Teams)</td></tr>
+      <tr><td>Desktop agent</td><td>Cowork (documents, files, knowledge work)</td><td>Not a focus &mdash; OpenClaw&rsquo;s strength is services, not desktop files</td></tr>
+      <tr><td>Automation</td><td>Scheduled tasks (cloud + desktop)</td><td>OS-level cron/launchd + skills (always-on service)</td></tr>
+      <tr><td>Multi-agent</td><td>Agent Teams (2&ndash;16 coordinated instances)</td><td>Single agent with skills</td></tr>
+      <tr><td>Security</td><td>Managed by Anthropic; sandboxed; enterprise controls</td><td>DIY; 60+ CVEs in 4 months; no enterprise controls</td></tr>
+      <tr><td>AI models</td><td>Claude only</td><td>Any (Claude, GPT, DeepSeek, Llama, Mistral, local)</td></tr>
+      <tr><td>Cost</td><td>~$20/month (Pro) or API-based</td><td>Free software + AI API costs</td></tr>
+      <tr><td>Data sovereignty</td><td>Data goes to Anthropic</td><td>You choose: cloud or fully local</td></tr>
+      <tr><td>Life integrations</td><td>Limited (through MCP servers)</td><td>50+ services (email, calendar, smart home, fitness, finance, etc.)</td></tr>
       <tr><td>Self-hosting</td><td>No</td><td>Yes &mdash; runs on your hardware</td></tr>
-      <tr><td>Supply chain risk</td><td>MCP servers (smaller ecosystem)</td><td>ClawHub (~20% malicious)</td></tr>
     </tbody>
   </table>
 </div>
 
 <h3>When to Use Which</h3>
-<p><strong>Claude Code</strong> is the better choice for coding, technical projects, and when you want managed security without worrying about CVEs.</p>
-<p><strong>OpenClaw</strong> is the better choice for personal life automation, when you need AI flexibility (mixing models), or when data sovereignty matters &mdash; keeping everything on your own hardware with local AI models.</p>
+
+<p><strong>Use Claude Code + Channels</strong> if you&rsquo;re a developer who wants to text your dev environment from your phone, with strong security and no CVEs to worry about.</p>
+
+<p><strong>Use Claude Cowork + Dispatch</strong> if you want a desktop assistant for documents, files, and research tasks &mdash; especially if you&rsquo;re not technical.</p>
+
+<p><strong>Use OpenClaw</strong> if you want to automate your whole life &mdash; email, calendar, smart home, health, meals, and dozens of other services &mdash; through messaging apps you already use, with the freedom to choose any AI model and keep your data on your own hardware.</p>
 
 <div class="callout callout-info">
   <strong>Many people use both</strong>
-  Claude Code for technical work, OpenClaw for everything else. They serve different needs and complement each other well.
+  Claude&rsquo;s ecosystem for coding and desk work, OpenClaw for everything else. They serve different moments in your day. As Channels adds more platforms and OpenClaw matures its security, the overlap will grow &mdash; but for now, the sweet spot is using each for what it does best.
 </div>
 
 <a href="#toc" class="back-top">&uarr; Back to top</a>
